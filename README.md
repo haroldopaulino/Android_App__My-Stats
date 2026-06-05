@@ -7,6 +7,7 @@ My Stats is a modern Android project designed to collect, store, display, and up
 This repository demonstrates practical Android engineering around background collection, local data persistence, endpoint synchronization, Compose UI, wearable UI design, modern Gradle/Kotlin tooling, and mobile telemetry architecture.
 
 <img width="768" height="512" alt="Sample_Image" src="https://github.com/user-attachments/assets/95f87b96-a5fe-4622-8ed8-604f78c78695" />
+
 ---
 
 ## Why This Project Matters
