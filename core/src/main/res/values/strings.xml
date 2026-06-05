@@ -1,0 +1,7 @@
+<resources>
+    <string name="core_app_name">My Stats</string>
+    <string name="channel_name">Stats Collector</string>
+    <string name="channel_description">Persistent diagnostics sampling service</string>
+    <string name="notification_title">My Stats collector running</string>
+    <string name="notification_text">Collecting diagnostics every 10 seconds</string>
+</resources>
