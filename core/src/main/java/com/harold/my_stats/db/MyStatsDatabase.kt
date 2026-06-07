@@ -5,7 +5,7 @@ import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
-@Database(entities = [ReportEntity::class, AppSettingsEntity::class], version = 3, exportSchema = false)
+@Database(entities = [ReportEntity::class, AppSettingsEntity::class], version = 4, exportSchema = false)
 abstract class MyStatsDatabase : RoomDatabase() {
     abstract fun reportDao(): ReportDao
     abstract fun appSettingsDao(): AppSettingsDao

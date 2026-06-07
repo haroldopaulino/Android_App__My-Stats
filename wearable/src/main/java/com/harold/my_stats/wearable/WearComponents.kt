@@ -7,6 +7,8 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.*
@@ -18,9 +20,9 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.wear.compose.material.Card
 import androidx.wear.compose.material.MaterialTheme
@@ -46,11 +48,11 @@ internal fun WearHeader(battery: String, subtitle: String, isRunning: Boolean) {
 @Composable
 internal fun WearCollectionCounters(collected: Long, collectedDataSizeBytes: Long, sent: Long, failed: Long) {
     Card(onClick = {}, modifier = Modifier.fillMaxWidth(0.94f).padding(vertical = 4.dp), backgroundPainter = androidx.wear.compose.material.CardDefaults.cardBackgroundPainter(startBackgroundColor = Color(0xFF101820), endBackgroundColor = Color(0xFF19232D)), shape = RoundedCornerShape(22.dp)) {
-        Column(Modifier.fillMaxWidth().padding(horizontal = 13.dp, vertical = 7.dp), verticalArrangement = Arrangement.spacedBy(3.dp)) {
-            WearCounterRow("Total Data Collection:", collected.toString())
-            WearCounterRow("Locally Stored Data Size:", formatByteSize(collectedDataSizeBytes))
-            WearCounterRow("Total Collections Sent to Endpoint:", sent.toString())
-            WearCounterRow("Failed sending to endpoint:", failed.toString())
+        Column(Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 6.dp), verticalArrangement = Arrangement.spacedBy(2.dp)) {
+            WearCounterRow("Total Collection:", collected.toString())
+            WearCounterRow("Local Data:", formatByteSize(collectedDataSizeBytes))
+            WearCounterRow("Collections Sent:", sent.toString())
+            WearCounterRow("Failed to send:", failed.toString())
         }
     }
 }
@@ -58,8 +60,8 @@ internal fun WearCollectionCounters(collected: Long, collectedDataSizeBytes: Lon
 @Composable
 private fun WearCounterRow(label: String, value: String) {
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween, verticalAlignment = Alignment.CenterVertically) {
-        Text(label, style = MaterialTheme.typography.caption2, color = Color(0xFFC7D0D9), maxLines = 1)
-        Text(value, style = MaterialTheme.typography.caption1, color = Color.White, fontWeight = FontWeight.Bold, maxLines = 1)
+        Text(label, style = MaterialTheme.typography.caption2, color = Color(0xFFC7D0D9), maxLines = 2, modifier = Modifier.weight(1f))
+        Text(value, style = MaterialTheme.typography.caption1, color = Color.White, fontWeight = FontWeight.Bold, maxLines = 1, textAlign = TextAlign.End)
     }
 }
 
@@ -67,7 +69,7 @@ private fun WearCounterRow(label: String, value: String) {
 internal fun WearStoppedCard() {
     Card(onClick = {}, modifier = Modifier.fillMaxWidth(0.9f).padding(vertical = 4.dp), backgroundPainter = androidx.wear.compose.material.CardDefaults.cardBackgroundPainter(startBackgroundColor = Color(0xFF101820), endBackgroundColor = Color(0xFF19232D)), shape = RoundedCornerShape(22.dp)) {
         Column(Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
-            IconBadge("▶", Color(0xFF4DA3FF), Modifier.size(44.dp))
+            IconBadge("▶", Color(0xFF4DA3FF), Modifier.size(12.dp))
             Spacer(Modifier.height(8.dp))
             Text("Start the service to show collected stats.", color = Color(0xFFC7D0D9), textAlign = TextAlign.Center, style = MaterialTheme.typography.caption1)
         }
@@ -76,15 +78,56 @@ internal fun WearStoppedCard() {
 
 @Composable
 internal fun WearMetricCard(row: WearMetric) {
-    Card(onClick = {}, modifier = Modifier.fillMaxWidth(0.94f).padding(vertical = 4.dp), backgroundPainter = androidx.wear.compose.material.CardDefaults.cardBackgroundPainter(startBackgroundColor = Color(0xFF101820), endBackgroundColor = Color(0xFF19232D)), shape = RoundedCornerShape(22.dp)) {
-        Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 13.dp, vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
-            IconBadge(row.icon, row.color, Modifier.size(44.dp))
-            Spacer(Modifier.width(10.dp))
+    var selectedInfo by remember { mutableStateOf<String?>(null) }
+    Card(
+        onClick = { row.infoDescription?.let { selectedInfo = it } },
+        modifier = Modifier.fillMaxWidth(0.94f).padding(vertical = 4.dp),
+        backgroundPainter = androidx.wear.compose.material.CardDefaults.cardBackgroundPainter(startBackgroundColor = Color(0xFF101820), endBackgroundColor = Color(0xFF19232D)),
+        shape = RoundedCornerShape(22.dp)
+    ) {
+        Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp, vertical = 8.dp), verticalAlignment = Alignment.CenterVertically) {
+            IconBadge(row.icon, row.color, Modifier.size(12.dp))
+            Spacer(Modifier.width(4.dp))
             Column(Modifier.weight(1f)) {
-                Text(row.title, style = MaterialTheme.typography.body2, color = Color.White, fontWeight = FontWeight.Bold, maxLines = 1)
-                Text(row.hint, style = MaterialTheme.typography.caption2, color = Color(0xFF8B99A5), maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(row.title, style = MaterialTheme.typography.caption1, color = Color.White, fontWeight = FontWeight.Bold, maxLines = 2)
+                Text(row.hint, style = MaterialTheme.typography.caption2, color = Color(0xFF8B99A5), maxLines = 2)
             }
-            Text(row.value, style = MaterialTheme.typography.body1, fontWeight = FontWeight.Bold, color = Color(0xFFE6EDF3), maxLines = 1, overflow = TextOverflow.Ellipsis)
+            Spacer(Modifier.width(3.dp))
+            Text(row.value, style = MaterialTheme.typography.caption1, fontWeight = FontWeight.Bold, color = Color(0xFFE6EDF3), maxLines = 2, textAlign = TextAlign.End)
+        }
+    }
+    selectedInfo?.let { info ->
+        WearMetricInfoDialog(title = row.title, description = info, onDismiss = { selectedInfo = null })
+    }
+}
+
+@Composable
+internal fun WearMetricInfoDialog(title: String, description: String, onDismiss: () -> Unit) {
+    Dialog(onDismissRequest = onDismiss) {
+        Card(
+            onClick = {},
+            modifier = Modifier.fillMaxWidth(0.94f),
+            backgroundPainter = androidx.wear.compose.material.CardDefaults.cardBackgroundPainter(startBackgroundColor = Color(0xFF101820), endBackgroundColor = Color(0xFF19232D)),
+            shape = RoundedCornerShape(22.dp)
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 10.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(title, style = MaterialTheme.typography.caption1, color = Color.White, fontWeight = FontWeight.Bold, textAlign = TextAlign.Center, maxLines = 2)
+                Spacer(Modifier.height(6.dp))
+                Text(
+                    description,
+                    modifier = Modifier.fillMaxWidth().height(96.dp).verticalScroll(rememberScrollState()),
+                    style = MaterialTheme.typography.caption2,
+                    color = Color(0xFFC7D0D9),
+                    textAlign = TextAlign.Start
+                )
+                Spacer(Modifier.height(8.dp))
+                androidx.wear.compose.material.Button(onClick = onDismiss, modifier = Modifier.fillMaxWidth(0.72f)) {
+                    Text("Dismiss", color = Color.White, fontWeight = FontWeight.Bold)
+                }
+            }
         }
     }
 }
@@ -93,7 +136,7 @@ internal fun WearMetricCard(row: WearMetric) {
 internal fun IconBadge(text: String, accent: Color, modifier: Modifier = Modifier) {
     Box(
         modifier = modifier
-            .clip(RoundedCornerShape(14.dp))
+            .clip(RoundedCornerShape(4.dp))
             .background(Brush.radialGradient(listOf(accent, accent.copy(alpha = 0.35f))))
             .padding(1.dp),
         contentAlignment = Alignment.Center
@@ -102,8 +145,8 @@ internal fun IconBadge(text: String, accent: Color, modifier: Modifier = Modifie
             text = text,
             color = Color.White,
             fontWeight = FontWeight.Black,
-            fontSize = 32.sp,
-            lineHeight = 32.sp,
+            fontSize = 8.sp,
+            lineHeight = 8.sp,
             maxLines = 1
         )
     }
@@ -137,12 +180,23 @@ fun WearComponentsHeaderStoppedPreview() {
     }
 }
 
-@Preview(name = "Wear Metric Card", showBackground = true, widthDp = 220, heightDp = 140)
+@Preview(name = "Wear Metric Card", showBackground = true, widthDp = 220, heightDp = 120)
 @Composable
 fun WearComponentsMetricCardPreview() {
     MaterialTheme(colors = MaterialTheme.colors.copy(background = Color.Black, surface = Color(0xFF101820), primary = Color(0xFF4DA3FF))) {
         Box(modifier = Modifier.fillMaxSize().background(Color.Black), contentAlignment = Alignment.Center) {
-            WearMetricCard(WearMetric("Battery", "86%", "Discharging", "▯", Color(0xFF67E08E)))
+            WearMetricCard(WearMetric("Memory", "7 MB", "4 processors running", "▥", Color(0xFF7E46E8)))
+        }
+    }
+}
+
+
+@Preview(name = "Wear Metric Info Card", showBackground = true, widthDp = 220, heightDp = 120)
+@Composable
+fun WearComponentsMetricInfoCardPreview() {
+    MaterialTheme(colors = MaterialTheme.colors.copy(background = Color.Black, surface = Color(0xFF101820), primary = Color(0xFF4DA3FF))) {
+        Box(modifier = Modifier.fillMaxSize().background(Color.Black), contentAlignment = Alignment.Center) {
+            WearMetricCard(WearMetric("CPU", "info", "Tap for details", "▣", Color(0xFF2F8DFF), "cat: /proc/loadavg: Permission denied"))
         }
     }
 }

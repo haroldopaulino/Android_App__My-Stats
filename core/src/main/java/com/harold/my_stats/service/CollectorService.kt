@@ -133,10 +133,12 @@ class CollectorService : Service() {
                 ReportUploader.upload(payload, endpointUrl)
                 dao.deleteById(entity.localId)
                 prefs.incrementSentEndpointCount()
+                MyStatsDatabase.get().appSettingsDao().incrementSentEndpointCount()
                 notifyCollectionDataChanged()
             }.onFailure {
                 dao.markFailed(entity.localId, it.message)
                 prefs.incrementFailedEndpointCount()
+                MyStatsDatabase.get().appSettingsDao().incrementFailedEndpointCount()
                 notifyCollectionDataChanged()
             }
         }

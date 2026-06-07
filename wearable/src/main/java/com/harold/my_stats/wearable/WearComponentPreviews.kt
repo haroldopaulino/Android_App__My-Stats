@@ -49,11 +49,11 @@ fun WearBatteryMetricPreview() {
     WearPreviewSurface {
         WearMetricCard(
             WearMetric(
-                title = "Battery",
-                value = "86%",
-                hint = "Discharging",
-                icon = "▯",
-                color = Color(0xFF67E08E)
+                title = "Memory",
+                value = "7 MB",
+                hint = "4 processors running",
+                icon = "▥",
+                color = Color(0xFF7E46E8)
             )
         )
     }
@@ -66,7 +66,7 @@ fun WearIconBadgePreview() {
         IconBadge(
             text = "▯",
             accent = Color(0xFF67E08E),
-            modifier = Modifier.padding(32.dp)
+            modifier = Modifier.padding(54.dp)
         )
     }
 }

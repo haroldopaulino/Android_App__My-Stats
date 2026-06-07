@@ -21,4 +21,10 @@ interface AppSettingsDao {
 
     @Query("UPDATE app_settings SET uploadIntervalMs = :uploadIntervalMs, updatedAtEpochMs = :updatedAt WHERE id = 1")
     suspend fun updateUploadInterval(uploadIntervalMs: Long, updatedAt: Long = System.currentTimeMillis())
+
+    @Query("UPDATE app_settings SET totalSentEndpointCount = totalSentEndpointCount + 1, updatedAtEpochMs = :updatedAt WHERE id = 1")
+    suspend fun incrementSentEndpointCount(updatedAt: Long = System.currentTimeMillis())
+
+    @Query("UPDATE app_settings SET totalFailedEndpointCount = totalFailedEndpointCount + 1, updatedAtEpochMs = :updatedAt WHERE id = 1")
+    suspend fun incrementFailedEndpointCount(updatedAt: Long = System.currentTimeMillis())
 }

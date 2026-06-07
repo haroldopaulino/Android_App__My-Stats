@@ -24,6 +24,10 @@ import androidx.wear.compose.material.Text
 internal fun previewWearState(): WearState = WearState(
     battery = "86%",
     subtitle = "Pixel Watch Preview",
+    collectedCount = 145,
+    collectedDataSizeBytes = 284_672,
+    sentEndpointCount = 120,
+    failedEndpointCount = 2,
     rows = listOf(
         WearMetric("Battery", "86%", "Discharging", "▯", Color(0xFF67E08E)),
         WearMetric("Temp", "31.4°", "Battery sensor", "℃", Color(0xFFFFC107)),
@@ -63,6 +67,7 @@ internal fun WearPreviewScreen(state: WearState, isRunning: Boolean) {
                     }
                 }
                 if (isRunning) {
+                    item { WearCollectionCounters(state.collectedCount, state.collectedDataSizeBytes, state.sentEndpointCount, state.failedEndpointCount) }
                     items(state.rows) { row -> WearMetricCard(row) }
                 } else {
                     item { WearStoppedCard() }
@@ -97,6 +102,6 @@ fun WearHeaderPreview() {
 @Composable
 fun WearMetricCardPreview() {
     WearPreviewSurface {
-        WearMetricCard(WearMetric("Battery", "86%", "Discharging", "▯", Color(0xFF67E08E)))
+        WearMetricCard(WearMetric("Memory", "7 MB", "4 processors running", "▥", Color(0xFF7E46E8)))
     }
 }

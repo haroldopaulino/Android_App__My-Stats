@@ -9,6 +9,8 @@ data class AppSettingsEntity(
     val endpointUrl: String = DEFAULT_ENDPOINT_URL,
     val darkTheme: Boolean = true,
     val uploadIntervalMs: Long = DEFAULT_UPLOAD_INTERVAL_MS,
+    val totalSentEndpointCount: Long = 0,
+    val totalFailedEndpointCount: Long = 0,
     val updatedAtEpochMs: Long = System.currentTimeMillis()
 ) {
     companion object {

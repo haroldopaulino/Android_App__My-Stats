@@ -14,10 +14,30 @@ internal fun JsonObject.int(key: String): Int? = this[key]?.jsonPrimitive?.intOr
 internal fun JsonObject.long(key: String): Long? = this[key]?.jsonPrimitive?.longOrNull
 internal fun JsonObject.double(key: String): Double? = this[key]?.jsonPrimitive?.doubleOrNull
 internal fun JsonObject.bool(key: String): Boolean? = this[key]?.jsonPrimitive?.booleanOrNull
+
+internal data class WearDisplayValue(val value: String, val description: String? = null)
+
+internal fun wearDisplayValue(raw: String?, expected: (String) -> Boolean = { it.isNotBlank() }): WearDisplayValue {
+    val text = raw?.trim().orEmpty()
+    if (text.isBlank()) return WearDisplayValue("--")
+    val lower = text.lowercase(java.util.Locale.US)
+    val unexpected = lower.startsWith("cat:") ||
+        lower.contains("permission denied") ||
+        lower.contains("operation not permitted") ||
+        lower.contains("no such file") ||
+        lower.startsWith("error:") ||
+        !expected(text)
+    return if (unexpected) WearDisplayValue("info", text) else WearDisplayValue(text)
+}
 internal fun batteryLabel(snapshot: JsonObject?): String = snapshot.obj("battery")?.int("levelPct")?.let { "$it%" } ?: "--"
 internal fun tempLabel(snapshot: JsonObject?): String = snapshot.obj("battery")?.double("temperatureC")?.let { String.format(java.util.Locale.US, "%.1f°", it) } ?: "--"
 internal fun dischargeLabel(snapshot: JsonObject?): String = snapshot.obj("battery")?.double("dischargeRatePctPerHour")?.let { String.format(java.util.Locale.US, "%.1f%%", it) } ?: "--"
 internal fun cpuLabel(snapshot: JsonObject?): String = snapshot.obj("cpu")?.string("loadAvg")?.split(" ")?.firstOrNull() ?: "--"
+internal fun cpuDisplayValue(snapshot: JsonObject?): WearDisplayValue {
+    val raw = snapshot.obj("cpu")?.string("loadAvg")
+    return wearDisplayValue(raw) { value -> value.split(" ").firstOrNull()?.toDoubleOrNull() != null }
+        .let { if (it.description == null) WearDisplayValue(it.value.split(" ").firstOrNull() ?: "--") else it }
+}
 internal fun cpuSubtitle(snapshot: JsonObject?): String = "${snapshot.obj("cpu")?.int("processorCount") ?: "--"} processors"
 internal fun memoryLabel(snapshot: JsonObject?): String { val total = snapshot.obj("cpu")?.long("jvmTotalMemoryBytes") ?: return "--"; val free = snapshot.obj("cpu")?.long("jvmFreeMemoryBytes") ?: 0L; return "${(total - free) / (1024 * 1024)} MB" }
 internal fun processLabel(snapshot: JsonObject?): String = snapshot.obj("cpu")?.int("runningProcessCountFromProc")?.let { "$it" } ?: "--"

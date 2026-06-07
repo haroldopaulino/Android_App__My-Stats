@@ -2,7 +2,14 @@ package com.harold.my_stats.wearable
 
 import androidx.compose.ui.graphics.Color
 
-internal data class WearMetric(val title: String, val value: String, val hint: String, val icon: String, val color: Color)
+internal data class WearMetric(
+    val title: String,
+    val value: String,
+    val hint: String,
+    val icon: String,
+    val color: Color,
+    val infoDescription: String? = null
+)
 internal data class WearState(
     val battery: String = "--",
     val subtitle: String = "Loading...",

@@ -22,6 +22,16 @@ interface ReportDao {
     @Query("SELECT payloadJson FROM debug_reports WHERE uploaded = 0 ORDER BY createdAtEpochMs ASC")
     suspend fun pendingPayloads(): List<String>
 
+    @Query("SELECT COALESCE(SUM(LENGTH(payloadJson)), 0) FROM debug_reports WHERE uploaded = 0")
+    suspend fun pendingStoredPayloadSizeBytes(): Long
+
+
+    @Query("SELECT COUNT(*) FROM debug_reports")
+    suspend fun localCount(): Int
+
+    @Query("SELECT payloadJson FROM debug_reports ORDER BY createdAtEpochMs ASC")
+    suspend fun localPayloads(): List<String>
+
     @Query("SELECT COUNT(*) FROM debug_reports")
     suspend fun totalCount(): Int
 
